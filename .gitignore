@@ -1,1 +1,5 @@
-//hello
+__pycache__/
+f2py
+f2py3
+f2py3.8
+*.png
