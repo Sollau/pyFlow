@@ -17,26 +17,31 @@ def det2x2(M):
     "Calculates the determinant of a 2x2 matrix."
     return (M[0][0]*M[1][1])-(M[0][1]*M[1][0])
 
-
-def principalMinor(B, x, y):
-    "Calculates the principal minor of a matrix, given the indexes of row x and column y."
-    Bminor=B
-    for i in range (0, len(B)):
-        Bminor[i].remove(Bminor[i][y-1])
-    Bminor.remove(Bminor[x-1])
+def ComplementaryMinor(B, x, y):
+    "Calculates the complementary minor of a matrix, given the indexes of row x and column y."
+    Bminor=[]
+    for h in range (0, len(B)):
+        Bminor.append([])
+        for i in range (0,len(B)):
+            Bminor[h].append(B[h][i])
+    for j in range (0, len(B)):
+        Bminor[j] = Bminor[j][:y]+Bminor[j][y+1:] 
+    Bminor.remove(Bminor[x])
     return Bminor
 
 def laplace(C):
     "Calculates the determinant of a NxN matrix, using the Lapalace method."
     det = 0
-    Cminors = C
-    while int(len(Cminors))>2:
-        for i in range (0, len(Cminors)):
-            det+= (-1)**i*C[0][i]*laplace(principalMinor(Cminors, 1, i+1))
-            Cminors = principalMinor(C, 1, i+1)
-    det+=det2x2(Cminors)
+    if len(C)==1:
+        det+=C[0][0]    
+    elif len(C)==2:
+        det+=det2x2(C)
+        print("This is 2x2det: " + str(det2x2(C)))
+        print(C)
+    else:    
+        for i in range(0, len(C)):
+            det+=(-1)**i*C[0][i]*laplace(ComplementaryMinor(C, 0, i))
+    
     return det
 
-print(laplace(A))    
-    
-    
+print(laplace(A))
