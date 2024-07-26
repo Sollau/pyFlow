@@ -5,26 +5,27 @@ import matplotlib.pyplot as plt
 
 a = 10 #passo del reticolo
     
-m = 0.511E6 #massa elettrone (eV)
-e = 1.062E-19 #carica elettrone (C)
-hbar = 6.582E-16 #costante di plank ridotta (eV*s)
+m = 0.511E6 #electron mass (eV)
+e = 1.062E-19 #electron charge (C)
+hbar = 6.582E-16 #reduced plank constant (eV*s)
 
-
-def laplacianOfExpo(f):
+def laplacianOfExpo(f, k):
     """This is the laplacian of f = exp(i*k*x)."""
-    return -(k**2)*f
+    return -(k**2) * f
 
-n=30
+n = 1000 #number of divisions
+x = np.linspace(1, a, n) #creates equispaced points of x axis
 
-x = np.linspace(1, a, n) 
+for k in range(0, 5):
+    phi = np.exp(1j * k * x) #expression of phi in real space
+    T = hbar**2 / (2 * m) * laplacianOfExpo(phi, k) #kinetic energy
+    H = T - ( e**2/ x) #hamilonian
+    plt.plot(x, np.real(H), label="k = " + str(k)) #plots Energy versus Space curves !!doubts on energy handling!!  
 
-for k in range (1,8):
-    phi = np.exp((0+1j)*k*x)
-    T = hbar**2/(2*m)*laplacianOfExpo(phi)
-    H =T-(1/x+k)
-    plt.plot(x, H, label = "k = "+str(k))
-
+#graph aesthetics
 plt.legend()
 plt.xlabel("x[a]")
 plt.ylabel("H[eV]")
-plt.show()
+#plt.ylim(0,)
+
+plt.show() #display graph
