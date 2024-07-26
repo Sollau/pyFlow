@@ -1,6 +1,4 @@
-import numpy as np
-import matplotlib as plt
-import math
+import matplotlib.pyplot as plt
 
 #parameters ?
 m = 0.5 
