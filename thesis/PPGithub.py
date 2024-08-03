@@ -1,4 +1,4 @@
-import PPBandStructureDefs as PPBSD
+import PPGithubDefs as PPDefs
 import numpy as np
 
 # lattice constant in meters
@@ -33,15 +33,15 @@ W = np.array([1, 1/2, 0])
 U = np.array([1/4, 1/4, 1])
 
 # k-paths
-lambd = PPBSD.linpath(L, G, n, endpoint=False)
-delta = PPBSD.linpath(G, X, n, endpoint=False)
-x_uk = PPBSD.linpath(X, U, n / 4, endpoint=False)
-sigma = PPBSD.linpath(K, G, n, endpoint=True)
+lambd = PPDefs.linpath(L, G, n, endpoint=False)
+delta = PPDefs.linpath(G, X, n, endpoint=False)
+x_uk = PPDefs.linpath(X, U, n // 4, endpoint=False)
+sigma = PPDefs.linpath(K, G, n, endpoint=True)
 
 
 
 # %%timeit -n 1 -r 1
-bands = PPBSD.band_structure(A, FORM_FACTORS, RECIPROCAL_BASIS, states=7, path=[lambd, delta, x_uk, sigma])
+bands = PPDefs.band_structure(A, FORM_FACTORS, RECIPROCAL_BASIS, states=7, path=[lambd, delta, x_uk, sigma])
 
 
 

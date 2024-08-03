@@ -20,7 +20,7 @@ def energy_minus(k, a1, a2):
     f = 3 + 2 * np.cos(k * a1[0]) + 2 * np.cos(k * a2[0]) + 2 * np.cos(k * (a1[0] - a2[0]))
     return (E_2p + y0 * np.sqrt(f)) / (1 + s0 * np.sqrt(f))
 
-k = np.linspace(-np.pi / a, np.pi / a, 100)
+k = np.linspace(-2*np.pi / a, 2*np.pi / a, 100)
 
 E_plus = energy_plus(k, a1, a2)
 E_minus = energy_minus(k, a1, a2)
