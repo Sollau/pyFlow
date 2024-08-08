@@ -1,8 +1,9 @@
 import numpy as np
 import matplotlib.pyplot as plt
 
-a = 5.431  # Lattice constant of Silicon (Rb)
+a = 5.431  # Lattice constant of Silicon (in atomic units)
 N = 100  # Number of points in the reciprocal space
+tau = a * np.array([1/8, 1/8, 1/8]) # Primitive vector
 
 def V_ps(G):
     """Total pseudopotential in atomic units, expanded in Fourier components."""
@@ -15,10 +16,10 @@ def V_ps(G):
     return 0
 
 def T(G, k):
-    """Calculates the kinetic energy, given a vector of the 1st Brillouin zone G and a k vector """
-    return 0.5 * np.linalg.norm(k + G)**2
+    """Calculates the kinetic energy, given a vector of the 1st Brillouin zone G and a k vector."""
+    return 0.5 * np.linalg.norm(k + G) ** 2
 
-# High-symmetry-points
+# High-symmetry points
 Gamma = np.array([0, 0, 0])
 X = np.array([2*np.pi/a, 0, 0])
 W = np.array([2*np.pi/a, np.pi/a, 0])
@@ -35,18 +36,20 @@ k_path = np.concatenate([
 
 def H_fill(k):
     """Calculates the Hamiltonian matrix in the 1st Brillouin zone, given k vectors."""
-    G_BZ = np.array([[i, j, l] for i in range(-1, 2) for j in range(-1, 2) for l in range(-1, 2)]) * (2 * np.pi / a)
-    H = np.zeros((len(G_BZ), len(G_BZ)), dtype=complex)
-    for i in range(len(G_BZ)):
-        for j in range(len(G_BZ)):
-            H[i, j] = V_ps(np.linalg.norm(G_BZ[i] - G_BZ[j]))*np.cos(((G_BZ[i] - G_BZ[j])[0]+(G_BZ[i] - G_BZ[j])[1]+(G_BZ[i] - G_BZ[j])[2])*np.pi/4)
-        H[i, i] += T(G_BZ[i], k)
+    G_vectors = np.array([[i, j, l] for i in range(-4, 4) for j in range(-4, 4) for l in range(-4, 4)]) * (2 * np.pi / a)
+    H = np.zeros((len(G_vectors), len(G_vectors)), dtype=np.float64)
+    for i in range(len(G_vectors)):
+        H[i][i] += T(G_vectors[i], k)
+        for j in range(len(G_vectors)):
+            G = G_vectors[i] - G_vectors[j]
+            H[i][j] += V_ps(G) * np.cos(np.dot(G, tau) * np.pi / 4)
     return H
 
 # Energy eigenvalues
 E = []
 for k in k_path:
-    E.append(np.linalg.eigh(H_fill(k))[0])  # Corrected to get only eigenvalues
+    e, _ = np.linalg.eigh(H_fill(k))  # Extract eigenvalues e 
+    E.append(e)
 
 # Plotting
 plt.figure(figsize=(10, 6))
