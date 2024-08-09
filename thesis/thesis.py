@@ -1,12 +1,13 @@
 import numpy as np
 import matplotlib.pyplot as plt
+from tqdm import tqdm  # Importing tqdm for the progress bar
 
-a = 5.431  # Lattice constant of Silicon (in atomic units)
+a = 5.431  # Lattice constant of Silicon (in unit of Bohr Radius)
 N = 100  # Number of points in the reciprocal space
 tau = a * np.array([1/8, 1/8, 1/8]) # Primitive vector
 
 def V_ps(G):
-    """Total pseudopotential in atomic units, expanded in Fourier components."""
+    """Fourier components of the pseudopotential."""
     if np.linalg.norm(G) == np.sqrt(3):
         return -0.1121
     elif np.linalg.norm(G) == np.sqrt(8):
@@ -14,6 +15,16 @@ def V_ps(G):
     elif np.linalg.norm(G) == np.sqrt(11):
         return 0.0362
     return 0
+
+def V_ps_TOT(G):
+    """Total pseudopotential."""
+    # Check if the sum of the ni is an odd multiple of 2
+    ni_sum = np.sum(G / (2 * np.pi / a))
+    if ni_sum % 2 == 1:
+        return 0
+    # Structure factor
+    structure_factor = np.cos(np.dot(G, tau) * np.pi / 4)
+    return V_ps(G) * structure_factor
 
 def T(G, k):
     """Calculates the kinetic energy, given a vector of the 1st Brillouin zone G and a k vector."""
@@ -34,20 +45,22 @@ k_path = np.concatenate([
     np.linspace(Gamma, K, 26)
 ])
 
+n = 4 # Bound of the range 
+
 def H_fill(k):
     """Calculates the Hamiltonian matrix in the 1st Brillouin zone, given k vectors."""
-    G_vectors = np.array([[i, j, l] for i in range(-4, 4) for j in range(-4, 4) for l in range(-4, 4)]) * (2 * np.pi / a)
+    G_vectors = np.array([[i, j, l] for i in range(-n, n) for j in range(-n, n) for l in range(-n, n)]) * (2 * np.pi / a)
     H = np.zeros((len(G_vectors), len(G_vectors)), dtype=np.float64)
     for i in range(len(G_vectors)):
         H[i][i] += T(G_vectors[i], k)
         for j in range(len(G_vectors)):
             G = G_vectors[i] - G_vectors[j]
-            H[i][j] += V_ps(G) * np.cos(np.dot(G, tau) * np.pi / 4)
+            H[i][j] += V_ps_TOT(G)
     return H
 
 # Energy eigenvalues
 E = []
-for k in k_path:
+for k in tqdm(k_path, desc="Calculating energy eigenvalues"):  # Adding progress bar to the loop
     e, _ = np.linalg.eigh(H_fill(k))  # Extract eigenvalues e 
     E.append(e)
 
