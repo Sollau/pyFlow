@@ -1,47 +1,15 @@
-A = []
-a_row =[]
-N = int(input("Insert the size N of your NxN matrix: "))
+import numpy as np
 
-#create matrix element by element
-for i in range (0, N):
-    for j in range (0, N):
-        a_row.append(int(input("a_" + str(i+1) + "," + str(j+1) + "= ")))
-    A.append(a_row)
-    a_row=[]
+list_1 = [1, 2, 3, 4, 5, 6, 7, 8, 9]
+list_2 = [10, 20, 30, 40, 50,60, 70, 80, 90]
 
-#display matrix
-for k in range (0,N):
-    print(A[k])
+l = len(list_1)
 
-def det2x2(M):
-    "Calculates the determinant of a 2x2 matrix."
-    return (M[0][0]*M[1][1])-(M[0][1]*M[1][0])
+M = np.zeros((l,l))
 
-def ComplementaryMinor(B, x, y):
-    "Calculates the complementary minor of a matrix, given the indexes of row x and column y."
-    Bminor=[]
-    for h in range (0, len(B)):
-        Bminor.append([])
-        for i in range (0,len(B)):
-            Bminor[h].append(B[h][i])
-    for j in range (0, len(B)):
-        Bminor[j] = Bminor[j][:y]+Bminor[j][y+1:] 
-    Bminor.remove(Bminor[x])
-    return Bminor
+for i in range(0, l):
+    M[i][i] += list_1[i]
+    for j in range (0, l):
+        M[i][j]+=list_1[-i]+list_2[j]
 
-def laplace(C):
-    "Calculates the determinant of a NxN matrix, using the Lapalace method."
-    det = 0
-    if len(C)==1:
-        det+=C[0][0]    
-    elif len(C)==2:
-        det+=det2x2(C)
-        print("This is 2x2det: " + str(det2x2(C)))
-        print(C)
-    else:    
-        for i in range(0, len(C)):
-            det+=(-1)**i*C[0][i]*laplace(ComplementaryMinor(C, 0, i))
-    
-    return det
-
-print(laplace(A))
+print(M)
