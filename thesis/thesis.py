@@ -9,11 +9,11 @@ tau = np.array([1/8, 1/8, 1/8])  # Primitive vector
 
 def V_ps(G):
     """Fourier components of the pseudopotential."""
-    if np.linalg.norm(G) == np.sqrt(3) * (2 * np.pi / a):
+    if np.dot(G, G) == 3 * (2 * np.pi / a)**2:
         return -0.1121
-    elif np.linalg.norm(G) == np.sqrt(8) * (2 * np.pi / a):
+    elif np.dot(G, G) == 8 * (2 * np.pi / a)**2:
         return 0.0276
-    elif np.linalg.norm(G) == np.sqrt(11) * (2 * np.pi / a):
+    elif np.dot(G, G) == 11 * (2 * np.pi / a)**2:
         return 0.0362
     else:
         return 0
