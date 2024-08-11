@@ -1,26 +1,47 @@
 import pyglet
 
+# window
+window = pyglet.window.Window(resizable=True)
 
-#open window
-window = pyglet.window.Window()
+# graphics
+batch = pyglet.graphics.Batch()
 
-up = pyglet.window.key.UP
-down = pyglet.window.key.DOWN
+# bird
+bird = pyglet.shapes.Circle(500, 500, 30, color = (255, 0, 0,), batch=batch )
+bird.visible = True
 
-quit = pyglet.window.key.Q
+# movement
+def on_key_press(symbol, modifiers):
+    if symbol == pyglet.window.key.UP:
+        print(f"Key UP pressed")
+        bird.y +=20
+        pass
 
-#up movement
-def on_key_press(up):
-    pass
+    if symbol == pyglet.window.key.DOWN:
+        print(f"Key DOWN pressed")
+        bird.y-=20
+        pass
 
-def on_key_release(up):
-    pass
+    if modifiers:
+        pass
 
 
+def on_key_release(symbol, modifiers):
+    if symbol:
+        pass
+    if modifiers:
+        pass
 
-#down movement
-def on_key_press(down):
-    pass
 
-def on_key_release(down):
-    pass
+window.push_handlers(on_key_press, on_key_release)
+
+
+# draw
+@window.event
+def on_draw():
+    window.clear()
+    batch.draw()
+
+
+# run
+pyglet.app.run()
