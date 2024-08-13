@@ -5,42 +5,46 @@ from tqdm import tqdm  # Importing tqdm for the progress bar
 a0 = 0.529  # Bohr radius (in Å)
 a = 5.431 * a0  # Lattice constant of Silicon
 N = 100  # Number of points in the reciprocal space
-tau = np.array([1 / 8, 1 / 8, 1 / 8])  # Primitive vector
+tau = np.array([1, 1, 1]) * (a / 8)  # Primitive vector
+h_bar = 6.582e-16  # Reduced Planck constant (in eV*s)
+m = 0.511e6  # Mass of the electron (in eV)
 
+conv = 27.2114 # Conversion factor from Hartree to eV
 
 def V_ps(G):
-    """Fourier components of the pseudopotential."""
+    """Fourier components of the pseudopotential in Eh (Hartree energy units)."""
     if np.isclose(np.dot(G, G), 3 * (2 * np.pi / a) ** 2, atol=1e-5):
-        return -0.1121
+        return (-0.1121*conv)
     elif np.isclose(np.dot(G, G), 8 * (2 * np.pi / a) ** 2, atol=1e-5):
-        return 0.0276
+        return (0.0276*conv)
     elif np.isclose(np.dot(G, G), 11 * (2 * np.pi / a) ** 2, atol=1e-5):
-        return 0.0362
+        return (0.0362*conv)
     else:
         return 0
 
 
 def V_ps_TOT(G):
     """Total pseudopotential, given a vector of the 1st Brillouin zone G."""
-    structure_factor = np.cos(np.dot(G, tau) * np.pi / 4)  # Structure factor
+    structure_factor = np.cos(np.dot(G, tau))  # Structure factor
     V = V_ps(G) * structure_factor  # Total pseudopotential
     return V
 
 
 def T(G, k):
     """Calculates the kinetic energy, given a vector of the 1st Brillouin zone G and a k vector."""
-    T = 0.5 * np.linalg.norm(k + G) ** 2  # Kinetic energy (in eV)
+    T = 0.5 * (np.linalg.norm(k + G)) ** 2  # Kinetic energy (in eV)
+    # aggiungere (h_bar**2/(2*m)) fa appiattire le linee
     return T
 
 
-n = 4  # Regulates the ranges of G_vectors in H_fill
+n = 2  # Regulates the ranges of G_vectors in H_fill 
 
 
 def H_fill(k):
     """Calculates the Hamiltonian matrix in the 1st Brillouin zone, given k vectors."""
     G_vectors = np.array(
         [[i, j, l] for i in range(-n, n) for j in range(-n, n) for l in range(-n, n)]
-    ) * (2 * np.pi / a)
+    ) * (4 * np.pi / a)
     H = np.zeros((len(G_vectors), len(G_vectors)), dtype=np.float64)
     for i in range(len(G_vectors)):
         H[i][i] += T(G_vectors[i], k)
@@ -77,7 +81,7 @@ if __name__ == "__main__":
 
     # Plotting
     plt.figure(figsize=(10, 6))
-    for i, band in enumerate(np.array(E).T[:5]):
+    for i, band in enumerate(np.array(E).T[:7]):
         plt.plot(np.linspace(0, 1, len(k_path)), band, label=f"Band {i+1}")
 
     # Add vertical lines for high-symmetry points
