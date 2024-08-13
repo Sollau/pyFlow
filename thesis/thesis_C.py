@@ -2,52 +2,46 @@ import numpy as np
 import matplotlib.pyplot as plt
 from tqdm import tqdm  # Importing tqdm for the progress bar
 
-# a0 = 0.52918  # Bohr radius (in Å)
-a = 5.431  # Lattice constant of Silicon (in units of Bohr radius as on Thjissen. For Cohen it's in Å)
+a = 5.431  # Lattice constant of Silicon (in Å)
 N = 100  # Number of points in the reciprocal space
-tau = np.array([1, 1, 1]) * (a / 8)  # Primitive vector (used in Cohen method)
+tau = np.array([1, 1, 1]) * (a / 8)  # Primitive vector
 
-# h_bar = 6.582e-16  # Reduced Planck constant (in eV*s)
-# m = 0.511e6  # Mass of the electron (in eV)
+h_bar = 6.582e-16  # Reduced Planck constant (in eV*s)
+m = 0.511e6  # Mass of the electron (in eV/c**2)
 
-# # Primitive vectors of the reciprocal lattice
-# b1 = np.array([-1, 1, 1]) * 2 * np.pi / a
-# b2 = np.array([1, -1, 1]) * 2 * np.pi / a
-# b3 = np.array([-1, 1, -1]) * 2 * np.pi / a
+c = 3e8  # Light speed (in m/s)
 
-# conv = 27.2114  # Conversion factor from Hartree to eV. For now everything is in atomic units
+conv = 27.2114  # Conversion factor from Eh to eV
 
 
 def V_ps(G):
-    """Fourier components of the pseudopotential in Eh (Hartree energy units)."""
-    if np.isclose(np.dot(G, G), 3 * (2 * np.pi / a) ** 2, atol=1e-5):
-        return -0.1121
-    elif np.isclose(np.dot(G, G), 8 * (2 * np.pi / a) ** 2, atol=1e-5):
-        return 0.0276
-    elif np.isclose(np.dot(G, G), 11 * (2 * np.pi / a) ** 2, atol=1e-5):
-        return 0.0362
+    """Fourier components (form factors) of the pseudopotential in eV."""
+    if np.isclose(np.dot(G, G), 3 * (2 * np.pi / a) ** 2, atol=1e-3):
+        return -0.1121 * conv
+    elif np.isclose(np.dot(G, G), 8 * (2 * np.pi / a) ** 2, atol=1e-3):
+        return 0.0276 * conv
+    elif np.isclose(np.dot(G, G), 11 * (2 * np.pi / a) ** 2, atol=1e-3):
+        return 0.0362 * conv
     else:
         return 0
 
 
 def V_ps_TOT(G):
     """Total pseudopotential, given a vector of the 1st Brillouin zone G."""
-    structure_factor = np.cos(
-        np.dot(G, tau)
-    )  # Structure factor as in Cohen {it's np.cos(np.pi*(n1+n2+n3)/4)) in Thjissen version, where G = n1*b1+n2*b2+n3*b3}
+    structure_factor = np.cos(np.dot(G, tau))  # Structure factor
     V = V_ps(G) * structure_factor  # Total pseudopotential
     return V
 
 
 def T(G, k):
-    """Calculates the kinetic energy, given a vector of the 1st Brillouin zone G and a k vector."""
+    """Calculates the kinetic energy (in eV), given a vector of the 1st Brillouin zone G and a k vector."""
     T = (
-        0.5 * (np.linalg.norm(k + G)) ** 2
-    )  # Kinetic energy {factor (h_bar**2/(2*m)) is missing in Thjissen because of atomic uits choice, but it's in Cohen}
+        ((h_bar*c)**2 / (2 * m *1E-20)) * (np.linalg.norm(k + G)) **2  # Add 1E-20 factor for conversion from Å**2 to m**2
+    )
     return T
 
 
-n = 2  # Regulates the ranges of G_vectors in H_fill
+n = 3  # Regulates the ranges of G_vectors in H_fill
 
 
 def H_fill(k):
@@ -101,8 +95,8 @@ if __name__ == "__main__":
         plt.axvline(x=point / len(k_path), color="k", linestyle="--")
     plt.xticks([point / len(k_path) for point in high_symmetry_points], labels)
 
-    plt.xlabel(r"k-path ($a_0^{-1}$)")
-    plt.ylabel(r"Energy ($E_H$)")
+    plt.xlabel("k-path (Å)")
+    plt.ylabel("Energy ($eV$)")
     plt.title("Band Structure of Silicon")
     plt.legend()
     plt.grid(True)
