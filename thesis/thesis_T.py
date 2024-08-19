@@ -49,7 +49,7 @@ n = 3  # Regulates the ranges of G_vectors in H_fill
 def H_fill(k):
     """Calculates the Hamiltonian matrix in the 1st Brillouin zone, given k vectors."""
     G_vectors = np.array(
-        [[i, j, l] for i in range(-n, n) for j in range(-n, n) for l in range(-n, n)]
+        [[i, j, l] for i in range(-n, n+1) for j in range(-n, n+1) for l in range(-n, n+1)]
     ) * (2 * np.pi / a)
     H = np.zeros((len(G_vectors), len(G_vectors)), dtype=np.float64)
     for i in range(len(G_vectors)):
@@ -83,6 +83,7 @@ if __name__ == "__main__":
     for k in tqdm(k_path, desc="Calculating energy eigenvalues"):  # Progress bar
         e = np.linalg.eigvalsh(H_fill(k))  # Computes eigenvalues e
         E.append(e)
+
 
     # Plotting
     plt.figure(figsize=(10, 6))
