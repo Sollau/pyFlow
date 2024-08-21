@@ -149,6 +149,6 @@ plt.grid(True)
 for band in bands:
     plt.plot(band)
 
-# Saave and show figure
+# Save and show figure
 plt.savefig("BandStructure_G.png")
 plt.show()

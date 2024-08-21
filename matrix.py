@@ -13,3 +13,7 @@ for i in range(0, l):
         M[i][j]+=list_1[-i]+list_2[j]
 
 print(M)
+
+n = l // 2
+for i in range (0, l):
+    print(M[i-n][i-n])    
