@@ -6,7 +6,9 @@ import scipy.constants as const
 a = 5.431e-10  # Lattice constant of Silicon (in m)
 N = 100  # Number of points in the reciprocal space
 
-tau = (1 / 8) * np.ones(3)  # Offset from the central node in the Bravais lattice (in units of a)
+tau = (1 / 8) * np.ones(
+    3
+)  # Offset from the central node in the Bravais lattice (in units of a)
 
 basis = np.array(
     [[-1, 1, 1], [1, -1, 1], [1, 1, -1]]
@@ -141,7 +143,7 @@ if __name__ == "__main__":
     plt.xticks([point / len(k_path) for point in high_symmetry_points], labels)
 
     plt.xlabel("k-path")
-    plt.ylabel("Energy ($eV$)")
+    plt.ylabel("Energy (eV)")
     plt.title("Band Structure of Silicon")
     plt.legend()
     plt.grid(True)
