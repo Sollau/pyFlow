@@ -46,8 +46,9 @@ def T(G, k):
     )  # Kinetic energy
     return T
 
+
 def index_generator(m, states):
-    """ Calculate the trplets of Miller indexes of a reciprocal lattice vector, given a index m and the number of states 'states'."""
+    """Calculate the trplets of Miller indexes of a reciprocal lattice vector, given a index m and the number of states 'states'."""
     n = (states**3) // 2
     s = m + n
     floor = states // 2
@@ -55,18 +56,18 @@ def index_generator(m, states):
     k = s % states**2 // states - floor
     l = s % states - floor
     return h, k, l
-    
+
 
 def vector_matrix(states, basis):
-    """ Construct a matrix of reciprocal lattice vectors, given the number of states 'states' and the primitive vectors 'basis'."""
-    n = states**3 # order of the matrix
-    G_matrix = np.zeros(shape=(n, n), dtype= object)
+    """Construct a matrix of reciprocal lattice vectors, given the number of states 'states' and the primitive vectors 'basis'."""
+    n = states**3  # order of the matrix
+    G_matrix = np.zeros(shape=(n, n), dtype=object)
     for i in range(n):
-        G_matrix[i][i] += index_generator(i-n//2, states)@basis
+        G_matrix[i][i] += index_generator(i - n // 2, states) @ basis
         for j in range(n):
-            G_matrix[i][j]+=index_generator(i-j, states)@basis
-    return G_matrix        
-        
+            G_matrix[i][j] += index_generator(i - j, states) @ basis
+    return G_matrix
+
 
 def H_fill(G_matrix, k):
     """Construct the Hamiltonian matrix, given a vector k of the irreducible 1st Brillouin zone border."""
@@ -78,13 +79,15 @@ def H_fill(G_matrix, k):
 
     # Fill the matrix
     for i in range(l):
-        # Add the diagonal kinetic terms
-        H[i][i] += T(G_matrix[i][i], k)
-
         for j in range(l):
-            # Add the potential terms
-            H[i][j] += V_ps_TOT(G_matrix[i][j])
             
+            if i == j:
+                # Add the diagonal kinetic+potential terms
+                H[i][i] = T(G_matrix[i][i], k)
+            else:    
+                # Add the off-diagonal potential terms
+                H[i][j] = V_ps_TOT(G_matrix[i][j])
+
     return H
 
 
@@ -93,27 +96,28 @@ if __name__ == "__main__":
     # High-symmetry points in units of 2*np.pi/a
     L = np.array([1 / 2, 1 / 2, 1 / 2])
     Gamma = np.array([0, 0, 0])
-    X = np.array([1, 0, 0])
-    U = np.array([1, 1 / 4, 1 / 4])
+    X = np.array([0, 0, 1])  # [1, 0, 0]
+    U = np.array([1 / 4, 1 / 4, 1])  # [1, 1 / 4, 1 / 4]
     K = np.array([3 / 4, 3 / 4, 0])
 
     # Irreducible 1st Brillouin zone boundary path L, G, X, U|K, G
     k_path = np.concatenate(
         [
-            np.linspace(L, Gamma, 100, endpoint=False), #26
-            np.linspace(Gamma, X, 100, endpoint=False), #26
-            np.linspace(X, U, 25, endpoint=False), #8
-            np.linspace(K, Gamma, 100), #20
+            np.linspace(L, Gamma, 100, endpoint=False),  # 26
+            np.linspace(Gamma, X, 100, endpoint=False),  # 26
+            np.linspace(X, U, 25, endpoint=False),  # 8
+            np.linspace(K, Gamma, 100),  # 20
         ]
     )
 
     G = vector_matrix(7, basis=basis)
-       
-    
+
     # Energy eigenvalues
     E = []
     for k in tqdm(k_path, desc="Calculating energy eigenvalues"):  # Progress bar
-        e = np.linalg.eigvalsh(H_fill(G, k))  # Computes eigenvalues e (assuming H symmetrycal)
+        e = np.linalg.eigvalsh(
+            H_fill(G, k)
+        )  # Computes eigenvalues e (assuming H symmetrycal)
         E.append(e)
 
     # Plotting
@@ -122,7 +126,7 @@ if __name__ == "__main__":
         plt.plot(np.linspace(0, 1, len(k_path)), band, label=f"Band {i+1}")
 
     # Add vertical lines for high-symmetry points in path L, G, X, U, G
-    high_symmetry_points = [0, 100, 200, 225, 325] #[0, 26, 52, 60, 100]
+    high_symmetry_points = [0, 100, 200, 225, 325]  # [0, 26, 52, 60, 100]
     labels = ["L", "Γ", "X", "U,K", "Γ"]
 
     for point in high_symmetry_points:
