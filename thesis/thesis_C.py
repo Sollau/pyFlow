@@ -46,38 +46,44 @@ def T(G, k):
     )  # Kinetic energy
     return T
 
-
-def coefficients(m, states):
-    """Calculate the coefficients (h, k,l) of a reciprocal lattice vector, given an index m and the number of states."""
-    # The following definitions of n, s and floor ensure that the index is centered around the zero of the states set
+def index_generator(m, states):
+    """ Calculate the trplets of Miller indexes of a reciprocal lattice vector, given a index m and the number of states 'states'."""
     n = (states**3) // 2
     s = m + n
     floor = states // 2
-
     h = s // states**2 - floor
     k = s % states**2 // states - floor
     l = s % states - floor
-
     return h, k, l
+    
 
-def H_fill(k, states):
+def vector_matrix(states, basis):
+    """ Construct a matrix of reciprocal lattice vectors, given the number of states 'states' and the primitive vectors 'basis'."""
+    n = states**3 # order of the matrix
+    G_matrix = np.zeros(shape=(n, n), dtype= object)
+    for i in range(n):
+        G_matrix[i][i] += index_generator(i-n//2, states)@basis
+        for j in range(n):
+            G_matrix[i][j]+=index_generator(i-j, states)@basis
+    return G_matrix        
+        
+
+def H_fill(G_matrix, k):
     """Construct the Hamiltonian matrix, given a vector k of the irreducible 1st Brillouin zone border."""
-    G_vectors = np.array(
-        [coefficients(m, states) for m in range(-states // 2, states // 2 + 1)]
-    ) @ basis  # in units of 2*np.pi/a
-    l = len(G_vectors)
+    # Get the order of G_matrix in order to create the hamiltonian matrix with the same dimensions
+    l = np.shape(G_matrix)[0]
 
     # Create a void matrix to fill with real numbers
     H = np.zeros((l, l), dtype=np.float64)
 
+    # Fill the matrix
     for i in range(l):
         # Add the diagonal kinetic terms
-        H[i][i] += T(G_vectors[i], k)
+        H[i][i] += T(G_matrix[i][i], k)
 
-        for j in range(i, l):
+        for j in range(l):
             # Add the potential terms
-            G = G_vectors[i] - G_vectors[j]
-            H[i][j] += V_ps_TOT(G)
+            H[i][j] += V_ps_TOT(G_matrix[i][j])
             
     return H
 
@@ -94,18 +100,20 @@ if __name__ == "__main__":
     # Irreducible 1st Brillouin zone boundary path L, G, X, U|K, G
     k_path = np.concatenate(
         [
-            np.linspace(L, Gamma, 26, endpoint=False),
-            np.linspace(Gamma, X, 26, endpoint=False),
-            np.linspace(X, U, 8, endpoint=False),
-            np.linspace(K, Gamma, 40),
+            np.linspace(L, Gamma, 100, endpoint=False), #26
+            np.linspace(Gamma, X, 100, endpoint=False), #26
+            np.linspace(X, U, 25, endpoint=False), #8
+            np.linspace(K, Gamma, 100), #20
         ]
     )
 
+    G = vector_matrix(7, basis=basis)
+       
+    
     # Energy eigenvalues
     E = []
-    states = 7 # Range [-3, 3]
     for k in tqdm(k_path, desc="Calculating energy eigenvalues"):  # Progress bar
-        e = np.linalg.eigvalsh(H_fill(k, states))  # Computes eigenvalues e
+        e = np.linalg.eigvalsh(H_fill(G, k))  # Computes eigenvalues e (assuming H symmetrycal)
         E.append(e)
 
     # Plotting
@@ -114,7 +122,7 @@ if __name__ == "__main__":
         plt.plot(np.linspace(0, 1, len(k_path)), band, label=f"Band {i+1}")
 
     # Add vertical lines for high-symmetry points in path L, G, X, U, G
-    high_symmetry_points = [0, 26, 52, 60, 100]
+    high_symmetry_points = [0, 100, 200, 225, 325] #[0, 26, 52, 60, 100]
     labels = ["L", "Γ", "X", "U,K", "Γ"]
 
     for point in high_symmetry_points:
@@ -126,6 +134,6 @@ if __name__ == "__main__":
     plt.title("Band Structure of Silicon")
     plt.legend()
     plt.grid(True)
-    
+
     plt.savefig("BandStructure_C.png")
     plt.show()
