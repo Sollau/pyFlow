@@ -1,1 +1,0 @@
-gfortran -O -c pseudo.f -o pseudo.o

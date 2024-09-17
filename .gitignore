@@ -3,3 +3,5 @@ f2py
 f2py3
 f2py3.8
 *.png
+thesis/__pycache__/
+thesis/otherMaterial/

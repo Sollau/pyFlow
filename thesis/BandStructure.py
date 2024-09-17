@@ -4,7 +4,6 @@ from tqdm import tqdm  # Importing tqdm for the progress bar
 import scipy.constants as const
 
 a = 5.431e-10  # Lattice constant of Silicon (in m)
-N = 100  # Number of points in the reciprocal space
 
 tau = (1 / 8) * np.ones(
     3
@@ -109,9 +108,9 @@ if __name__ == "__main__":
     k_path = np.concatenate(
         [
             np.linspace(L, Gamma, 100, endpoint=False),
-            np.linspace(Gamma, X, 100, endpoint=False),
-            np.linspace(X, U, 25, endpoint=False),
-            np.linspace(K, Gamma, 100),
+            np.linspace(Gamma, X, 116, endpoint=False),
+            np.linspace(X, U, 41, endpoint=False),
+            np.linspace(K, Gamma, 123),
         ]
     )
 
@@ -135,7 +134,7 @@ if __name__ == "__main__":
         plt.plot(np.linspace(0, 1, len(k_path)), band, label=f"Band {i+1}")
 
     # Add vertical lines for high-symmetry points in path L, Γ, X, U, Γ
-    high_symmetry_points = [0, 100, 200, 225, 325]
+    high_symmetry_points = [0, 100, 216, 257, 380]
     labels = ["L", "Γ", "X", "U,K", "Γ"]
 
     for point in high_symmetry_points:
@@ -148,5 +147,6 @@ if __name__ == "__main__":
     plt.legend()
     plt.grid(True)
 
-    plt.savefig("BandStructure.png")
+    plt.savefig("modifiedBandStructure.png")
     plt.show()
+

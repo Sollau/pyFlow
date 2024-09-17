@@ -1,1 +1,0 @@
- ln -s /usr/lib/libfftw.so.2 /usr/lib/libdfftw.so
